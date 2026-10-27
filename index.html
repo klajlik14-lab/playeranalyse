@@ -185,7 +185,7 @@
         });
     }
 
-    const elKat = document.getElementById('kategorie');
+const elKat = document.getElementById('kategorie');
     const elKlub = document.getElementById('klub');
     const elHrac = document.getElementById('hrac');
 
@@ -205,7 +205,10 @@
         const val = this.value;
         if (!val) { elKlub.disabled = true; return; }
         const filtered = parsedData.filter(d => d.Kategorie === val);
-        const kluby = getUniqueValues(filtered, 'Klub');
+        
+        // ZMĚNA: Hledáme sloupec Team místo Klub
+        const kluby = getUniqueValues(filtered, 'Team');
+        
         elKlub.innerHTML = '<option value="">-- Vyber klub --</option>';
         kluby.forEach(klub => { elKlub.innerHTML += `<option value="${klub}">${klub}</option>`; });
         elKlub.disabled = false; elHrac.disabled = true;
@@ -216,9 +219,14 @@
         const valKat = elKat.value;
         const valKlub = this.value;
         if (!valKlub) { elHrac.disabled = true; return; }
-        const filtered = parsedData.filter(d => d.Kategorie === valKat && d.Klub === valKlub);
+        
+        // ZMĚNA: Filtrujeme podle Team
+        const filtered = parsedData.filter(d => d.Kategorie === valKat && d.Team === valKlub);
+        
         elHrac.innerHTML = '<option value="">-- Vyber hráče --</option>';
-        filtered.forEach(d => { elHrac.innerHTML += `<option value="${d.Hrac}">${d.Hrac} (${d.Pozice})</option>`; });
+        
+        // ZMĚNA: Vypisujeme jméno ze sloupce Player
+        filtered.forEach(d => { elHrac.innerHTML += `<option value="${d.Player}">${d.Player} (${d.Pozice})</option>`; });
         elHrac.disabled = false;
     });
 
@@ -226,7 +234,8 @@
         const hracJmeno = this.value;
         if (!hracJmeno) return;
 
-        const playerData = parsedData.find(d => d.Hrac === hracJmeno && d.Klub === elKlub.value && d.Kategorie === elKat.value);
+        // ZMĚNA: Hledáme podle Player a Team
+        const playerData = parsedData.find(d => d.Player === hracJmeno && d.Team === elKlub.value && d.Kategorie === elKat.value);
         if (!playerData) return;
 
         // Načte percentily a surové hodnoty z dat podle našich 16 klíčů
