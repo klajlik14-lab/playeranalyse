@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotbalový Pizza Graf (Wyscout Data)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; }
+        select { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; min-width: 180px; outline: none; transition: border-color 0.3s; }
+        select:focus { border-color: #2c3e50; }
+        select:disabled { background-color: #ecf0f1; color: #95a5a6; border-color: #e0e0e0; }
+        
+        .chart-container { position: relative; height: 750px; width: 100%; display: flex; justify-content: center; }
+        
+        #statusMessage { text-align: center; color: #e74c3c; font-weight: bold; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Analýza hráče</h1>
+    
+    <div id="statusMessage">Chyba: Nepodařilo se načíst soubor data.csv.</div>
+
+    <!-- Kaskádové filtry -->
+    <div class="filters">
+        <select id="kategorie" disabled>
+            <option value="">-- Vyber kategorii --</option>
+        </select>
+        <select id="klub" disabled>
+            <option value="">-- Vyber klub --</option>
+        </select>
+        <select id="hrac" disabled>
+            <option value="">-- Vyber hráče --</option>
+        </select>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="pizzaChart"></canvas>
+    </div>
+</div>
+
+<script>
+    Chart.register(ChartDataLabels);
+
+    let parsedData = []; 
+    let pizzaChartInstance = null;
+
+    const metricKeys = [
+        'Shots', 'Touches', 'Off_duels', 'xG', 
+        'Prog_runs', 'Shot_assists', 'Dribbles', 'Smart_passes', 
+        'Acc_passes', 'Prog_passes', 'Passes_final_third', 'Long_passes', 
+        'Succ_def_actions', 'Def_duels', 'Aerial_duels', 'Interceptions'
+    ];
+
+    const labels = [
+        ['Shots', 'per 90'], ['Touches in', 'pen. area'], ['Offensive duels', 'won %'], ['xG', 'per shot'],
+        ['Progressive', 'runs'], ['Shot', 'assists'], ['Dribbles', 'per 90'], ['Smart', 'passes'],
+        ['Accurate', 'passes %'], ['Progressive', 'passes'], ['Passes to', 'final third'], ['Long', 'passes %'],
+        ['Succ. def.', 'actions'], ['Defensive duels', 'won %'], ['Aerial duels', 'won %'], ['Interceptions']
+    ];
+
+    const backgroundColors = [
+        'rgba(46, 204, 113, 0.7)', 'rgba(46, 204, 113, 0.7)', 'rgba(46, 204, 113, 0.7)', 'rgba(46, 204, 113, 0.7)', 
+        'rgba(230, 126, 34, 0.7)', 'rgba(230, 126, 34, 0.7)', 'rgba(230, 126, 34, 0.7)', 'rgba(230, 126, 34, 0.7)', 
+        'rgba(52, 152, 219, 0.7)', 'rgba(52, 152, 219, 0.7)', 'rgba(52, 152, 219, 0.7)', 'rgba(52, 152, 219, 0.7)', 
+        'rgba(155, 89, 182, 0.7)', 'rgba(155, 89, 182, 0.7)', 'rgba(155, 89, 182, 0.7)', 'rgba(155, 89, 182, 0.7)' 
+    ];
+    const borderColors = backgroundColors.map(color => color.replace('0.7', '1'));
+
+    let currentPercentiles = Array(16).fill(0);
+    let currentRawValues = Array(16).fill('');
+
+    function initChart() {
+        const ctx = document.getElementById('pizzaChart').getContext('2d');
+        pizzaChartInstance = new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        data: currentPercentiles,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1.5,
+                        datalabels: {
+                            labels: {
+                                valueBox: {
+                                    align: 'center', anchor: 'center', backgroundColor: 'white', borderColor: '#333',
+                                    borderWidth: 1, borderRadius: 4, color: '#333', font: { weight: 'bold', size: 11 },
+                                    padding: { top: 4, bottom: 4, left: 6, right: 6 },
+                                    formatter: function(value, context) {
+                                        return currentRawValues[context.dataIndex] || '';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        data: Array(16).fill(100),
+                        backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(0,0,0,0)', borderWidth: 0,
+                        datalabels: {
+                            labels: {
+                                nameLabel: {
+                                    align: 'end', anchor: 'end', offset: 5, textAlign: 'center',
+                                    color: function(context) { return borderColors[context.dataIndex]; },
+                                    font: { weight: '600', size: 12 },
+                                    formatter: function(value, context) { return context.chart.data.labels[context.dataIndex]; },
+                                    rotation: function(context) {
+                                        const total = context.chart.data.labels.length;
+                                        const step = 360 / total;
+                                        let angle = (context.dataIndex * step) + (step / 2) - 90;
+                                        let tangentialAngle = angle + 90;
+                                        let normalizedAngle = (tangentialAngle % 360 + 360) % 360;
+                                        if (normalizedAngle > 90 && normalizedAngle < 270) { return tangentialAngle + 180; }
+                                        return tangentialAngle;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, layout: { padding: 70 },
+                interaction: { mode: 'index', intersect: true },
+                scales: {
+                    r: { min: 0, max: 100, ticks: { stepSize: 20, display: false }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, angleLines: { display: true, color: 'rgba(0, 0, 0, 0.1)' } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        displayColors: false,
+                        filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; },
+                        callbacks: {
+                            title: function(context) { return context[0].chart.data.labels[context[0].dataIndex].join(' '); },
+                            label: function(context) { return `Percentil: ${context.raw} | Hodnota: ${currentRawValues[context.dataIndex]}`; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+// ZDE VLOŽ SVŮJ ODKAZ Z GOOGLE TABULEK
+    const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtgZg75pP-MytWN3ATzxRtVhR8oh1RuozT_kc82dLyYqGKLKk_WTSCcdR_mMRYJ7aFrTbXjLel6v_B/pub?gid=35253027&single=true&output=csv';
+
+    function loadDefaultCSV() {
+        Papa.parse(googleSheetUrl, {
+            download: true,
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                parsedData = results.data;
+                populateKategorie();
+                document.getElementById('statusMessage').style.display = 'none';
+            },
+            error: function(err) {
+                console.error("Chyba při načítání souboru:", err);
+                document.getElementById('statusMessage').textContent = 'Chyba: Nepodařilo se stáhnout data z Google Tabulek.';
+                document.getElementById('statusMessage').style.display = 'block';
+            }
+        });
+    }
+
+    const elKat = document.getElementById('kategorie');
+    const elKlub = document.getElementById('klub');
+    const elHrac = document.getElementById('hrac');
+
+    function getUniqueValues(data, key) {
+        return [...new Set(data.map(item => item[key]))].filter(val => val != null);
+    }
+
+    function populateKategorie() {
+        const kategorie = getUniqueValues(parsedData, 'Kategorie');
+        elKat.innerHTML = '<option value="">-- Vyber kategorii --</option>';
+        kategorie.forEach(kat => { elKat.innerHTML += `<option value="${kat}">${kat}</option>`; });
+        elKat.disabled = false; elKlub.disabled = true; elHrac.disabled = true;
+        elKlub.innerHTML = '<option value="">-- Vyber klub --</option>'; elHrac.innerHTML = '<option value="">-- Vyber hráče --</option>';
+    }
+
+    elKat.addEventListener('change', function() {
+        const val = this.value;
+        if (!val) { elKlub.disabled = true; return; }
+        const filtered = parsedData.filter(d => d.Kategorie === val);
+        const kluby = getUniqueValues(filtered, 'Klub');
+        elKlub.innerHTML = '<option value="">-- Vyber klub --</option>';
+        kluby.forEach(klub => { elKlub.innerHTML += `<option value="${klub}">${klub}</option>`; });
+        elKlub.disabled = false; elHrac.disabled = true;
+        elHrac.innerHTML = '<option value="">-- Vyber hráče --</option>';
+    });
+
+    elKlub.addEventListener('change', function() {
+        const valKat = elKat.value;
+        const valKlub = this.value;
+        if (!valKlub) { elHrac.disabled = true; return; }
+        const filtered = parsedData.filter(d => d.Kategorie === valKat && d.Klub === valKlub);
+        elHrac.innerHTML = '<option value="">-- Vyber hráče --</option>';
+        filtered.forEach(d => { elHrac.innerHTML += `<option value="${d.Hrac}">${d.Hrac} (${d.Pozice})</option>`; });
+        elHrac.disabled = false;
+    });
+
+    elHrac.addEventListener('change', function() {
+        const hracJmeno = this.value;
+        if (!hracJmeno) return;
+
+        const playerData = parsedData.find(d => d.Hrac === hracJmeno && d.Klub === elKlub.value && d.Kategorie === elKat.value);
+        if (!playerData) return;
+
+        currentPercentiles = metricKeys.map(key => playerData[key + '_pct'] || 0);
+        currentRawValues = metricKeys.map(key => playerData[key + '_val'] || '');
+
+        pizzaChartInstance.data.datasets[0].data = currentPercentiles;
+        pizzaChartInstance.update();
+    });
+
+    // Po načtení stránky se inicializuje graf a rovnou se začne stahovat data.csv
+    window.onload = function() {
+        initChart();
+        loadDefaultCSV();
+    };
+</script>
+</body>
+</html>
