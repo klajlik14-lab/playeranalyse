@@ -140,9 +140,18 @@
                     tooltip: {
                         displayColors: false,
                         filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; },
-                        callbacks: {
-                            title: function(context) { return context[0].chart.data.labels[context[0].dataIndex].join(' '); },
-                            label: function(context) { return `Percentil: ${context.raw} | Hodnota: ${currentRawValues[context.dataIndex]}`; }
+                       callbacks: {
+                label: function(context) {
+                    // Kontext nám dá přístup k indexu, na který uživatel ukazuje
+                    let index = context.dataIndex;
+                    let metricName = context.chart.data.labels[index];
+                    let percentile = context.raw; // Hodnota výseče v grafu
+                    
+                    // Získáme tu skutečnou hodnotu (např. pocet přihrávek), co jsme uložili v updatu
+                    let realValue = context.dataset.rawValues[index]; 
+                    
+                    // Sestavíme text tooltipu (např. "Střely na 90 min: 4.5 (85. percentil)")
+                    return `${metricName}: ${realValue} (${percentile}. PR)`;
                         }
                     }
                 }
