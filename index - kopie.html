@@ -54,18 +54,24 @@
     let parsedData = []; 
     let pizzaChartInstance = null;
 
+    // 1. ZDE DEFINUJEME PŘESNÉ NÁZVY Z CSV (Vygenerované Google makrem)
     const metricKeys = [
-        'Shots', 'Touches', 'Off_duels', 'xG', 
-        'Prog_runs', 'Shot_assists', 'Dribbles', 'Smart_passes', 
-        'Acc_passes', 'Prog_passes', 'Passes_final_third', 'Long_passes', 
-        'Succ_def_actions', 'Def_duels', 'Aerial_duels', 'Interceptions'
+        // --- OBRANA (Zelená barva) ---
+        'Successful defensive actions per 90', 'Defensive duels won, %', 'PAdj Interceptions', 'Aerial duels won, %',
+        // --- KREATIVITA & POHYB (Oranžová barva) ---
+        'xA per 90', 'Progressive runs per 90', 'Dribbles per 90', 'Smart passes per 90',
+        // --- DISTRIBUCE (Modrá barva) ---
+        'Accurate long passes, %', 'Progressive passes per 90', 'Accurate progressive passes, %', 'Accurate passes, %',
+        // --- ÚTOK (Fialová barva) ---
+        'xG per 90', 'Shots per 90', 'Touches in box per 90', 'Offensive duels won, %'
     ];
 
+    // 2. TEXTY PRO GRAF (Rozdělené do polí kvůli zalamování řádků)
     const labels = [
-        ['Shots', 'per 90'], ['Touches in', 'pen. area'], ['Offensive duels', 'won %'], ['xG', 'per shot'],
-        ['Progressive', 'runs'], ['Shot', 'assists'], ['Dribbles', 'per 90'], ['Smart', 'passes'],
-        ['Accurate', 'passes %'], ['Progressive', 'passes'], ['Passes to', 'final third'], ['Long', 'passes %'],
-        ['Succ. def.', 'actions'], ['Defensive duels', 'won %'], ['Aerial duels', 'won %'], ['Interceptions']
+        ['Succ. def.', 'actions / 90'], ['Defensive', 'duels won %'], ['PAdj', 'Interceptions'], ['Aerial', 'duels won %'],
+        ['xA', 'per 90'], ['Progressive', 'runs / 90'], ['Dribbles', 'per 90'], ['Smart', 'passes / 90'],
+        ['Acc. long', 'passes %'], ['Progressive', 'passes / 90'], ['Acc. prog.', 'passes %'], ['Accurate', 'passes %'],
+        ['xG', 'per 90'], ['Shots', 'per 90'], ['Touches', 'in box / 90'], ['Offensive', 'duels won %']
     ];
 
     const backgroundColors = [
@@ -140,18 +146,16 @@
                     tooltip: {
                         displayColors: false,
                         filter: function(tooltipItem) { return tooltipItem.datasetIndex === 0; },
-                       callbacks: {
-                label: function(context) {
-                    // Kontext nám dá přístup k indexu, na který uživatel ukazuje
-                    let index = context.dataIndex;
-                    let metricName = context.chart.data.labels[index];
-                    let percentile = context.raw; // Hodnota výseče v grafu
-                    
-                    // Získáme tu skutečnou hodnotu (např. pocet přihrávek), co jsme uložili v updatu
-                    let realValue = context.dataset.rawValues[index]; 
-                    
-                    // Sestavíme text tooltipu (např. "Střely na 90 min: 4.5 (85. percentil)")
-                    return `${metricName}: ${realValue} (${percentile}. PR)`;
+                        callbacks: {
+                            label: function(context) {
+                                let index = context.dataIndex;
+                                // Spojíme popisek (který je jako pole slov) do jednoho textu s mezerou
+                                let metricName = context.chart.data.labels[index].join(' ');
+                                let percentile = context.raw; 
+                                let realValue = currentRawValues[index]; 
+                                
+                                return `${metricName}: ${realValue} (${percentile}. PR)`;
+                            }
                         }
                     }
                 }
@@ -159,7 +163,7 @@
         });
     }
 
-// ZDE VLOŽ SVŮJ ODKAZ Z GOOGLE TABULEK
+    // ODKAZ NA TVÁ DATA V GOOGLE TABULKÁCH
     const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtgZg75pP-MytWN3ATzxRtVhR8oh1RuozT_kc82dLyYqGKLKk_WTSCcdR_mMRYJ7aFrTbXjLel6v_B/pub?gid=35253027&single=true&output=csv';
 
     function loadDefaultCSV() {
@@ -225,6 +229,7 @@
         const playerData = parsedData.find(d => d.Hrac === hracJmeno && d.Klub === elKlub.value && d.Kategorie === elKat.value);
         if (!playerData) return;
 
+        // Načte percentily a surové hodnoty z dat podle našich 16 klíčů
         currentPercentiles = metricKeys.map(key => playerData[key + '_pct'] || 0);
         currentRawValues = metricKeys.map(key => playerData[key + '_val'] || '');
 
@@ -232,7 +237,6 @@
         pizzaChartInstance.update();
     });
 
-    // Po načtení stránky se inicializuje graf a rovnou se začne stahovat data.csv
     window.onload = function() {
         initChart();
         loadDefaultCSV();
