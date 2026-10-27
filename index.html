@@ -241,6 +241,7 @@ const elKat = document.getElementById('kategorie');
         // Načte percentily a surové hodnoty z dat podle našich 16 klíčů
         currentPercentiles = metricKeys.map(key => playerData[key + '_pct'] || 0);
         currentRawValues = metricKeys.map(key => playerData[key + '_val'] || '');
+        console.log("DATA HRÁČE Z CSV:", playerData, "PERCENTILY DO GRAFU:", currentPercentiles);
 
         pizzaChartInstance.data.datasets[0].data = currentPercentiles;
         pizzaChartInstance.update();
