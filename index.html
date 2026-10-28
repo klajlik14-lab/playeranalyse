@@ -423,30 +423,47 @@ const elKat = document.getElementById('kategorie');
         
         elHrac.innerHTML = '<option value="">-- Vyber hráče --</option>';
         
-        // ZMĚNA: Vypisujeme jméno ze sloupce Player
-        filtered.forEach(d => { elHrac.innerHTML += `<option value="${d.Player}">${d.Player} (${d.Pozice})</option>`; });
+        filtered.forEach(d => {
+            // Skryje slovo "Polař" v U15, ale ponechá "Brankář"
+            let posText = '';
+            if (valKat === 'U15') {
+                posText = (d.Pozice === 'Brankář') ? ' (Brankář)' : '';
+            } else if (d.Pozice) {
+                posText = ` (${d.Pozice})`;
+            }
+
+            elHrac.innerHTML += `<option value="${d.Player}">${d.Player}${posText}</option>`;
+        });
         elHrac.disabled = false;
     });
 
     elHrac.addEventListener('change', function() {
         const hracJmeno = this.value;
-        if (!hracJmeno) return;
+        if (!hracJmeno) {
+            document.getElementById('playerCard').style.display = 'none';
+            return;
+        }
 
-        // ZMĚNA: Hledáme podle Player a Team
         const playerData = parsedData.find(d => d.Player === hracJmeno && d.Team === elKlub.value && d.Kategorie === elKat.value);
         if (!playerData) return;
-        // Zobrazení a naplnění karty profilu
+
+        // 1. ZOBRAZENÍ A NAPLNĚNÍ KARTY HRÁČE
         const card = document.getElementById('playerCard');
         card.style.display = 'flex';
 
         document.getElementById('cardName').textContent = playerData.Player || '-';
-        
-        // Zobrazí např: "CF (Útočník) • 17 let"
-        const wyscoutPos = playerData.OriginalPosition || playerData.Pozice || '-';
-        const age = playerData.Age ? `${playerData.Age} let` : '';
-        document.getElementById('cardPosAge').textContent = `${wyscoutPos} (${playerData.Pozice || ''}) • ${age}`;
 
-        // Minutáž
+        // Ošetření pozice na kartě (pro U15 skryje "Polař")
+        const wyscoutPos = playerData.OriginalPosition || playerData.Pozice || '';
+        const age = playerData.Age ? `${playerData.Age} let` : '';
+        let displayPos = playerData.Pozice || '';
+        if (playerData.Kategorie === 'U15' && displayPos !== 'Brankář') {
+            displayPos = '';
+        }
+        const posLabel = displayPos ? `${wyscoutPos} (${displayPos})` : wyscoutPos;
+        document.getElementById('cardPosAge').textContent = posLabel ? `${posLabel} • ${age}` : age;
+
+        // Minuty a zápasy
         const mins = playerData['Minutes played'] || 0;
         const matches = playerData['Matches played'] || 0;
         document.getElementById('cardMinutes').textContent = `${mins}' / ${matches} záp.`;
@@ -460,10 +477,9 @@ const elKat = document.getElementById('kategorie');
         document.getElementById('cardYellow').textContent = playerData['Yellow cards_val'] || 0;
         document.getElementById('cardRed').textContent = playerData['Red cards_val'] || 0;
 
-        // Načte percentily a surové hodnoty z dat podle našich 16 klíčů
+        // 2. AKTUALIZACE PIZZA GRAFU
         currentPercentiles = metricKeys.map(key => playerData[key + '_pct'] || 0);
-        currentRawValues = metricKeys.map(key => playerData[key + '_val'] || '');
-        console.log("DATA HRÁČE Z CSV:", playerData, "PERCENTILY DO GRAFU:", currentPercentiles);
+        currentRawValues = metricKeys.map(key => playerData[key + '_val'] !== undefined ? playerData[key + '_val'] : '');
 
         pizzaChartInstance.data.datasets[0].data = currentPercentiles;
         pizzaChartInstance.update();
