@@ -191,7 +191,7 @@
             background-color: #ef4444;
             border: 1px solid #dc2626;
         }
-        /* Responzivita pro mobily (360px a méně / do 768px obecně) */
+     /* Responzivita pro mobil – graf na maximum šířky displeje */
 @media (max-width: 768px) {
     .container {
         flex-direction: column !important;
@@ -236,20 +236,21 @@
         font-size: 0.88rem !important;
     }
 
-    /* Prostor pro graf na mobilu */
+    /* GRAF NA MOBILU: Odsazení jen 4px a šířka 100vw bez omezení */
     .chart-container {
         width: 100% !important;
+        height: auto !important;
         min-height: auto !important;
-        height: 380px !important; /* optimální výška na výšku displeje telefonu */
-        padding: 8px !important;
+        padding: 4px !important;
         box-sizing: border-box;
     }
 
     #pizzaChart {
         width: 100% !important;
-        height: 100% !important;
-        max-width: 350px !important;
-        max-height: 350px !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: none !important;
+        aspect-ratio: 1 / 1 !important; /* Vždy dokonalý kruh na celou šířku displeje */
     }
 }
     </style>
