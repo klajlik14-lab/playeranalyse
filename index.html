@@ -26,32 +26,23 @@
 <body>
 
 <div class="container">
-    <!-- LEVÝ PANEL -->
-    <aside class="sidebar">
+    <div class="filters">
         <h1>Analýza hráče</h1>
-        
         <div id="statusMessage">Chyba: Nepodařilo se načíst soubor data.csv.</div>
+        <select id="kategorie" disabled>
+            <option value="">-- Vyber kategorii --</option>
+        </select>
+        <select id="klub" disabled>
+            <option value="">-- Vyber klub --</option>
+        </select>
+        <select id="hrac" disabled>
+            <option value="">-- Vyber hráče --</option>
+        </select>
+    </div>
 
-        <!-- Kaskádové filtry (nyní v levém panelu pod sebou) -->
-        <div class="filters">
-            <select id="kategorie" disabled>
-                <option value="">-- Vyber kategorii --</option>
-            </select>
-            <select id="klub" disabled>
-                <option value="">-- Vyber klub --</option>
-            </select>
-            <select id="hrac" disabled>
-                <option value="">-- Vyber hráče --</option>
-            </select>
-        </div>
-    </aside>
-
-    <!-- PRAVÝ OBSAH S GRAFEM -->
-    <main class="content">
-        <div class="chart-container">
-            <canvas id="pizzaChart"></canvas>
-        </div>
-    </main>
+    <div class="chart-container">
+        <canvas id="pizzaChart"></canvas>
+    </div>
 </div>
 
 <script>
@@ -257,95 +248,81 @@ const elKat = document.getElementById('kategorie');
         initChart();
         loadDefaultCSV();
     };
-    /* Hlavní kontejner – roztáhne se na celou výšku a poskládá panel a graf vedle sebe */
-.container {
-    display: flex;
-    min-height: 100vh;
-    width: 100%;
-    background-color: #f8fafc;
-    box-sizing: border-box;
-}
-
-/* Levý boční panel */
-.sidebar {
-    width: 320px;
-    min-width: 280px;
-    background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
-    box-sizing: border-box;
-}
-
-.sidebar h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #1e293b;
+html, body {
     margin: 0;
-}
-
-/* Filtry – naskládané vertikálně pod sebou */
-.filters {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.filters select {
+    padding: 0;
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background-color: #ffffff;
-    font-size: 0.95rem;
-    color: #334155;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f8fafc;
 }
 
-.filters select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.filters select:disabled {
-    background-color: #f1f5f9;
-    color: #94a3b8;
-    cursor: not-allowed;
-    border-color: #e2e8f0;
-}
-
-/* Status message */
-#statusMessage {
-    font-size: 0.85rem;
-    color: #dc2626;
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 6px;
-    padding: 8px 12px;
-}
-
-/* Pravá část s grafem */
-.content {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+/* Hlavní wrapper: drží celou výšku a dělí obrazovku vlevo/vpravo */
+.container {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw;
+    height: 100vh;
     box-sizing: border-box;
     overflow: hidden;
 }
 
-/* Obal grafu zachovává velikost a responzivitu Chart.js */
-.chart-container {
-    position: relative;
+/* Levý sloupec s filtry pod sebou */
+.filters {
+    width: 320px !important;
+    min-width: 320px !important;
+    height: 100% !important;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px;
+}
+
+.filters h1 {
+    font-size: 1.3rem;
+    margin: 0 0 10px 0;
+    color: #1e293b;
+}
+
+.filters select {
     width: 100%;
-    max-width: 850px;
-    height: 85vh;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+#statusMessage {
+    font-size: 0.85rem;
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #fecaca;
+}
+
+/* Pravá plocha: explicitní rozměry, aby Chart.js nezmizel */
+.chart-container {
+    flex: 1 !important;
+    height: 100% !important;
+    position: relative !important;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pizzaChart {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 800px;
+    max-height: 800px;
 }
 </script>
 </body>
