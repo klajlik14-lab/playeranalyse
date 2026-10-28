@@ -243,8 +243,11 @@
         width: 100% !important;
         height: auto !important;
         min-height: auto !important;
-        padding: 4px !important;
+        padding: 0 4px !important;
         box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     #pizzaChart {
@@ -361,8 +364,8 @@
                             labels: {
                                 valueBox: {
                                     align: 'center', anchor: 'center', backgroundColor: 'white', borderColor: '#333',
-                                    borderWidth: 1, borderRadius: 4, color: '#333', font: { weight: 'bold', size: 11 },
-                                    padding: { top: 4, bottom: 4, left: 6, right: 6 },
+                                    borderWidth: 1, borderRadius: 4, color: '#333', font: { weight: 'bold', size: window.innerWidth < 450 ? 8 : 11 },
+                                    padding: window.innerWidth < 450 ? { top: 1, bottom: 1, left: 3, right: 3 } : { top: 4, bottom: 4, left: 6, right: 6 },
                                     formatter: function(value, context) {
                                         return currentRawValues[context.dataIndex] || '';
                                     }
@@ -376,11 +379,11 @@
                         datalabels: {
                             labels: {
                                 nameLabel: {
-                                    align: 'end', anchor: 'end', offset: 5, textAlign: 'center',
+                                    align: 'end', anchor: 'end', offset: window.innerWidth < 450 ? 2 : 6, textAlign: 'center',
                                     color: function(context) { return borderColors[context.dataIndex]; },
                                     font: { 
                                             weight: '600', 
-                                            size: window.innerWidth < 450 ? 8.5 : 11 
+                                            size: window.innerWidth < 450 ? 7.5 : 11 
                                             },
                                     formatter: function(value, context) { return context.chart.data.labels[context.dataIndex]; },
                                     rotation: function(context) {
@@ -399,7 +402,7 @@
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, layout: { padding: window.innerWidth < 450 ? 24 : 55 },
+                responsive: true, maintainAspectRatio: false, layout: { padding: window.innerWidth < 450 ? 46 : 60 },
                 interaction: { mode: 'index', intersect: true },
                 scales: {
                     r: { min: 0, max: 100, ticks: { stepSize: 20, display: false }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, angleLines: { display: true, color: 'rgba(0, 0, 0, 0.1)' } }
