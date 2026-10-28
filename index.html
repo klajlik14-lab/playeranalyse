@@ -9,18 +9,102 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
-        
-        .filters { display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; }
-        select { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; min-width: 180px; outline: none; transition: border-color 0.3s; }
-        select:focus { border-color: #2c3e50; }
-        select:disabled { background-color: #ecf0f1; color: #95a5a6; border-color: #e0e0e0; }
-        
-        .chart-container { position: relative; height: 750px; width: 100%; display: flex; justify-content: center; }
-        
-        #statusMessage { text-align: center; color: #e74c3c; font-weight: bold; margin-bottom: 15px; display: none; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Flexbox kontejner: drží sidebar a graf VEDLE SEBE */
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100vw;
+            min-height: 100vh;
+        }
+
+        /* Levý sloupec s pevnou šířkou */
+        .sidebar {
+            width: 320px;
+            min-width: 320px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .sidebar h1 {
+            font-size: 1.35rem;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        #statusMessage {
+            font-size: 0.85rem;
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+        }
+
+        /* Filtry hezky pod sebou */
+        .filters {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filters select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #ffffff;
+            font-size: 0.95rem;
+            color: #334155;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filters select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .filters select:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Pravá část s grafem – flexibilní a s pevnou výškou pro canvas */
+        .chart-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        #pizzaChart {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 780px;
+            max-height: 780px;
+        }
     </style>
 </head>
 <body>
@@ -251,94 +335,7 @@ const elKat = document.getElementById('kategorie');
         initChart();
         loadDefaultCSV();
     };
-    /*tady začíná nová část*/
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f8fafc;
-}
-
-/* Flexbox kontejner: drží sidebar a graf VEDLE SEBE */
-.container {
-    display: flex;
-    flex-direction: row;
-    width: 100vw;
-    min-height: 100vh;
-}
-
-/* Levý sloupec s pevnou šířkou */
-.sidebar {
-    width: 320px;
-    min-width: 320px;
-    background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.sidebar h1 {
-    font-size: 1.3rem;
-    color: #1e293b;
-    margin-bottom: 4px;
-}
-
-#statusMessage {
-    font-size: 0.85rem;
-    color: #dc2626;
-    background: #fef2f2;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #fecaca;
-}
-
-/* Filtry hezky pod sebou */
-.filters {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.filters select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #ffffff;
-    font-size: 0.95rem;
-    color: #334155;
-    outline: none;
-}
-
-.filters select:disabled {
-    background-color: #f1f5f9;
-    color: #94a3b8;
-    cursor: not-allowed;
-}
-
-/* Pravá část s grafem – flexibilní a s pevnou výškou pro canvas */
-.chart-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    min-height: 600px;
-    position: relative;
-}
-
-#pizzaChart {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 750px;
-    max-height: 750px;
-}
 </script>
 </body>
 </html>
