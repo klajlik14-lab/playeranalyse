@@ -191,6 +191,67 @@
             background-color: #ef4444;
             border: 1px solid #dc2626;
         }
+        /* Responzivita pro mobily (360px a méně / do 768px obecně) */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column !important;
+        width: 100% !important;
+        min-height: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 16px !important;
+        gap: 12px !important;
+        box-shadow: none !important;
+    }
+
+    .sidebar h1 {
+        font-size: 1.15rem;
+    }
+
+    .filters {
+        gap: 8px !important;
+    }
+
+    .filters select {
+        padding: 8px 10px !important;
+        font-size: 0.88rem !important;
+    }
+
+    .player-card {
+        padding: 12px !important;
+        gap: 8px !important;
+    }
+
+    .card-name {
+        font-size: 1rem !important;
+    }
+
+    .card-stat-item .stat-value {
+        font-size: 0.88rem !important;
+    }
+
+    /* Prostor pro graf na mobilu */
+    .chart-container {
+        width: 100% !important;
+        min-height: auto !important;
+        height: 380px !important; /* optimální výška na výšku displeje telefonu */
+        padding: 8px !important;
+        box-sizing: border-box;
+    }
+
+    #pizzaChart {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 350px !important;
+        max-height: 350px !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -314,7 +375,10 @@
                                 nameLabel: {
                                     align: 'end', anchor: 'end', offset: 5, textAlign: 'center',
                                     color: function(context) { return borderColors[context.dataIndex]; },
-                                    font: { weight: '600', size: 12 },
+                                    font: { 
+                                            weight: '600', 
+                                            size: window.innerWidth < 450 ? 8.5 : 11 
+                                            },
                                     formatter: function(value, context) { return context.chart.data.labels[context.dataIndex]; },
                                     rotation: function(context) {
                                         const total = context.chart.data.labels.length;
@@ -332,7 +396,7 @@
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, layout: { padding: 70 },
+                responsive: true, maintainAspectRatio: false, layout: { padding: window.innerWidth < 450 ? 24 : 55 },
                 interaction: { mode: 'index', intersect: true },
                 scales: {
                     r: { min: 0, max: 100, ticks: { stepSize: 20, display: false }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, angleLines: { display: true, color: 'rgba(0, 0, 0, 0.1)' } }
