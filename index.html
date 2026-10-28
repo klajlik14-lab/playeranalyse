@@ -398,6 +398,7 @@ const elKat = document.getElementById('kategorie');
     }
 
     elKat.addEventListener('change', function() {
+        document.getElementById('playerCard').style.display = 'none';
         const val = this.value;
         if (!val) { elKlub.disabled = true; return; }
         const filtered = parsedData.filter(d => d.Kategorie === val);
@@ -412,6 +413,7 @@ const elKat = document.getElementById('kategorie');
     });
 
     elKlub.addEventListener('change', function() {
+        document.getElementById('playerCard').style.display = 'none';
         const valKat = elKat.value;
         const valKlub = this.value;
         if (!valKlub) { elHrac.disabled = true; return; }
@@ -433,6 +435,30 @@ const elKat = document.getElementById('kategorie');
         // ZMĚNA: Hledáme podle Player a Team
         const playerData = parsedData.find(d => d.Player === hracJmeno && d.Team === elKlub.value && d.Kategorie === elKat.value);
         if (!playerData) return;
+        // Zobrazení a naplnění karty profilu
+        const card = document.getElementById('playerCard');
+        card.style.display = 'flex';
+
+        document.getElementById('cardName').textContent = playerData.Player || '-';
+        
+        // Zobrazí např: "CF (Útočník) • 17 let"
+        const wyscoutPos = playerData.OriginalPosition || playerData.Pozice || '-';
+        const age = playerData.Age ? `${playerData.Age} let` : '';
+        document.getElementById('cardPosAge').textContent = `${wyscoutPos} (${playerData.Pozice || ''}) • ${age}`;
+
+        // Minutáž
+        const mins = playerData['Minutes played'] || 0;
+        const matches = playerData['Matches played'] || 0;
+        document.getElementById('cardMinutes').textContent = `${mins}' / ${matches} záp.`;
+
+        // Góly a xG
+        const goals = playerData['Goals_val'] !== undefined ? playerData['Goals_val'] : 0;
+        const xg = playerData['xG_val'] !== undefined ? playerData['xG_val'] : 0;
+        document.getElementById('cardGoalsXg').textContent = `${goals} (${xg} xG)`;
+
+        // Karty
+        document.getElementById('cardYellow').textContent = playerData['Yellow cards_val'] || 0;
+        document.getElementById('cardRed').textContent = playerData['Red cards_val'] || 0;
 
         // Načte percentily a surové hodnoty z dat podle našich 16 klíčů
         currentPercentiles = metricKeys.map(key => playerData[key + '_pct'] || 0);
