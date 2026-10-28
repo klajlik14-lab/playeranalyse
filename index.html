@@ -105,6 +105,92 @@
             max-width: 780px;
             max-height: 780px;
         }
+        /* Karta profilu v sidebaru */
+        .player-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: -6px;
+        }
+
+        .card-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+
+        .card-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .card-cards-row {
+            display: flex;
+            gap: 14px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+
+        .card-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        /* Piktogramy karet */
+        .card-icon {
+            width: 13px;
+            height: 18px;
+            border-radius: 2px;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        .yellow-card {
+            background-color: #facc15;
+            border: 1px solid #eab308;
+        }
+
+        .red-card {
+            background-color: #ef4444;
+            border: 1px solid #dc2626;
+        }
     </style>
 </head>
 <body>
