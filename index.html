@@ -26,25 +26,28 @@
 <body>
 
 <div class="container">
-    <div class="filters">
+    <div class="sidebar">
         <h1>Analýza hráče</h1>
         <div id="statusMessage">Chyba: Nepodařilo se načíst soubor data.csv.</div>
-        <select id="kategorie" disabled>
-            <option value="">-- Vyber kategorii --</option>
-        </select>
-        <select id="klub" disabled>
-            <option value="">-- Vyber klub --</option>
-        </select>
-        <select id="hrac" disabled>
-            <option value="">-- Vyber hráče --</option>
-        </select>
+
+        <div class="filters">
+            <select id="kategorie" disabled>
+                <option value="">-- Vyber kategorii --</option>
+            </select>
+            <select id="klub" disabled>
+                <option value="">-- Vyber klub --</option>
+            </select>
+            <select id="hrac" disabled>
+                <option value="">-- Vyber hráče --</option>
+            </select>
+        </div>
     </div>
 
     <div class="chart-container">
         <canvas id="pizzaChart"></canvas>
     </div>
 </div>
-
+    
 <script>
     Chart.register(ChartDataLabels);
 
@@ -248,81 +251,93 @@ const elKat = document.getElementById('kategorie');
         initChart();
         loadDefaultCSV();
     };
-html, body {
+    /*tady začíná nová část*/
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
+}
+
+body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #f8fafc;
 }
 
-/* Hlavní wrapper: drží celou výšku a dělí obrazovku vlevo/vpravo */
+/* Flexbox kontejner: drží sidebar a graf VEDLE SEBE */
 .container {
-    display: flex !important;
-    flex-direction: row !important;
+    display: flex;
+    flex-direction: row;
     width: 100vw;
-    height: 100vh;
-    box-sizing: border-box;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
-/* Levý sloupec s filtry pod sebou */
-.filters {
-    width: 320px !important;
-    min-width: 320px !important;
-    height: 100% !important;
-    background: #ffffff;
+/* Levý sloupec s pevnou šířkou */
+.sidebar {
+    width: 320px;
+    min-width: 320px;
+    background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
     padding: 24px;
-    box-sizing: border-box;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.filters h1 {
+.sidebar h1 {
     font-size: 1.3rem;
-    margin: 0 0 10px 0;
     color: #1e293b;
-}
-
-.filters select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #fff;
-    font-size: 0.95rem;
-    box-sizing: border-box;
+    margin-bottom: 4px;
 }
 
 #statusMessage {
     font-size: 0.85rem;
     color: #dc2626;
     background: #fef2f2;
-    padding: 8px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 6px;
     border: 1px solid #fecaca;
 }
 
-/* Pravá plocha: explicitní rozměry, aby Chart.js nezmizel */
+/* Filtry hezky pod sebou */
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filters select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 0.95rem;
+    color: #334155;
+    outline: none;
+}
+
+.filters select:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Pravá část s grafem – flexibilní a s pevnou výškou pro canvas */
 .chart-container {
-    flex: 1 !important;
-    height: 100% !important;
-    position: relative !important;
-    padding: 30px;
-    box-sizing: border-box;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 24px;
+    min-height: 600px;
+    position: relative;
 }
 
 #pizzaChart {
     width: 100% !important;
     height: 100% !important;
-    max-width: 800px;
-    max-height: 800px;
+    max-width: 750px;
+    max-height: 750px;
 }
 </script>
 </body>
