@@ -125,6 +125,32 @@
                 <option value="">-- Vyber hráče --</option>
             </select>
         </div>
+        <div id="playerCard" class="player-card" style="display: none;">
+                <div class="card-name" id="cardName">-</div>
+                <div class="card-subtitle" id="cardPosAge">-</div>
+
+                <div class="card-stats-grid">
+                    <div class="card-stat-item">
+                        <span class="stat-label">Minuty / Zápasy</span>
+                        <span class="stat-value" id="cardMinutes">-</span>
+                    </div>
+                    <div class="card-stat-item">
+                        <span class="stat-label">Góly / xG</span>
+                        <span class="stat-value" id="cardGoalsXg">-</span>
+                    </div>
+                </div>
+
+                <div class="card-cards-row">
+                    <div class="card-pill">
+                        <span class="card-icon yellow-card"></span>
+                        <span id="cardYellow">0</span>
+                    </div>
+                    <div class="card-pill">
+                        <span class="card-icon red-card"></span>
+                        <span id="cardRed">0</span>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <div class="chart-container">
